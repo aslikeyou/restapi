@@ -13,4 +13,6 @@ Web-server is available on `http://localhost:8000/`
 
 Default route `main` will show you all available routes
 
+**Tested on PHP 5.5.18, Mysql 5.6.21, OS X 10.10.1**
+
 Have fun:))
