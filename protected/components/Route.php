@@ -17,6 +17,13 @@ class Route implements IComponent {
         $this->routes = self::$routestmp;
     }
 
+    public static function getHeader($name, $defaultValue = '') {
+        if(isset($_SERVER['HTTP_'.$name])) {
+            return $_SERVER['HTTP_'.$name];
+        }
+        return $defaultValue;
+    }
+
     public static function GET($pattern, $callable) {
         self::$routestmp[self::METHOD_GET][$pattern] = $callable;
     }
@@ -35,8 +42,20 @@ class Route implements IComponent {
         $patternData = $this->routes[$verb][$matchedPattern];
         $routeVars = $this->extractVarsFromRoute($matchedPattern, $route);
 
-        if(is_callable($patternData)) {
-            $return = call_user_func_array($patternData, $routeVars);
+
+        if(!is_array($patternData)) {
+            $patternData = [$patternData];
+        }
+
+        if(isset($patternData['before']) && is_callable($patternData['before'])) {
+            $res = boolval(call_user_func($patternData['before']));
+            if($res !== true) {
+                throw new AppHttpException(500);
+            }
+        }
+
+        if(is_callable($patternData[0])) {
+            $return = call_user_func_array($patternData[0], $routeVars);
             if(!empty($return)) {
                 Rest::sendResponse($return);
             }
